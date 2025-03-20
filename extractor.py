@@ -1,15 +1,38 @@
 from argparse import ArgumentParser, Namespace
 import sys
 import zipfile
+import json
+import shutil
+import os
 
 
 def main(args: Namespace) -> int:
+    print(f"Extracting assets from {args.jar_path}...")
     with zipfile.ZipFile(args.jar_path, "r") as jar:
         for file in jar.namelist():
             if file.startswith("assets/"):
                 # Extract the file to the output directory
                 jar.extract(file, args.output)
                 print(f"Extracted: {file}")
+    print("Extraction complete.")
+
+    print(f"Copying assets from index {args.index}...")
+    with open(f"{args.asset_path}/indexes/{args.index}.json", "r") as f:
+        index_data = json.load(f)
+        objects = index_data["objects"]
+        for name, info in objects.items():
+            path = f"{args.asset_path}/objects/{info['hash'][0:2]}/{info['hash']}"
+            output_path = f"{args.output}/{name}"
+
+            if os.path.getsize(path) != info["size"]:
+                print(f"Skipping {name}: size mismatch.")
+                continue
+
+            if not os.path.exists(os.path.dirname(output_path)):
+                os.makedirs(os.path.dirname(output_path))
+            shutil.copyfile(path, output_path)
+            print(f"Copied: {name} to {output_path}")
+    
     return 0
 
 
