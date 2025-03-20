@@ -32,7 +32,7 @@ def main(args: Namespace) -> int:
                 os.makedirs(os.path.dirname(output_path))
             shutil.copyfile(path, output_path)
             print(f"Copied: {name} to {output_path}")
-    
+    print("Copying complete.")
     return 0
 
 
