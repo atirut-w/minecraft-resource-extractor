@@ -1,8 +1,15 @@
 from argparse import ArgumentParser, Namespace
 import sys
+import zipfile
 
 
 def main(args: Namespace) -> int:
+    with zipfile.ZipFile(args.jar_path, "r") as jar:
+        for file in jar.namelist():
+            if file.startswith("assets/"):
+                # Extract the file to the output directory
+                jar.extract(file, args.output)
+                print(f"Extracted: {file}")
     return 0
 
 
