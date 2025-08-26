@@ -6,24 +6,6 @@ import shutil
 import os
 
 
-def mergedirs(src: str, dst: str) -> None:
-    """
-    Merges the contents of the source directory into the destination directory.
-    """
-
-    print(f"Merging {src} into {dst}...")
-    for item in os.listdir(src):
-        src_path = os.path.join(src, item)
-        dst_path = os.path.join(dst, item)
-
-        if os.path.isdir(src_path):
-            if not os.path.exists(dst_path):
-                os.makedirs(dst_path)
-            mergedirs(src_path, dst_path)
-        else:
-            shutil.copyfile(src_path, dst_path)
-
-
 def main(args: Namespace) -> int:
     print(f"Extracting assets from {args.jar_path}...")
     with zipfile.ZipFile(args.jar_path, "r") as jar:
@@ -40,7 +22,7 @@ def main(args: Namespace) -> int:
         objects = index_data["objects"]
         for name, info in objects.items():
             path = f"{args.asset_path}/objects/{info['hash'][0:2]}/{info['hash']}"
-            output_path = f"{args.output}/{name}"
+            output_path = f"{args.output}/assets/{name}"
 
             if os.path.getsize(path) != info["size"]:
                 print(f"Skipping {name}: size mismatch.")
@@ -51,13 +33,6 @@ def main(args: Namespace) -> int:
             shutil.copyfile(path, output_path)
             print(f"Copied: {name} to {output_path}")
     print("Copying complete.")
-
-    print(f"Fixing up directory structure...")
-    mergedirs(f"{args.output}/minecraft", f"{args.output}/assets/minecraft")
-    shutil.rmtree(f"{args.output}/minecraft")
-    mergedirs(f"{args.output}/realms", f"{args.output}/assets/realms")
-    shutil.rmtree(f"{args.output}/realms")
-    print("Directory structure fixed.")
     return 0
 
 
